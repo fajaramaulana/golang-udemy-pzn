@@ -1,0 +1,220 @@
+openapi: '3.0.3'
+info:
+  title: Category RESTFULL API
+  version: '1.0.0'
+  description: Category RESTFULL API
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    name: "Fajar Agus Maulana"
+    url: http://www.swagger.io/support
+    email: "fajaramaulana.dev@gmail.com"
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: http://localhost:8081/api
+    description: Local server
+paths:
+  /categories:
+    get:
+      security:
+        - CategoryAuth: []
+      description: Get all Category
+      summary: Get all Category
+      tags:
+        - "Category API"
+      responses:
+        '200':
+          description: Success get all Category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: number
+                    example: 200
+                  status:
+                    type: string
+                    example: OK
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CategoryResponseAll'
+    post:
+      description: Create new Category
+      security:
+        - CategoryAuth: []
+      summary: Create new Category
+      tags:
+        - "Category API"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateCategory'
+      responses:
+        '200':
+          description: Success create new Category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: number
+                    example: 200
+                  status:
+                    type: string
+                    example: OK
+                  data:
+                    $ref: '#/components/schemas/Category'
+  /categories/{categoryId}:
+    get: 
+      description: Get Category by ID.
+      security:
+        - CategoryAuth: []
+      summary: Get Category by ID.
+      tags:
+        - "Category API"
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: ID of Category
+          schema:
+            type: number
+            example: 1
+      responses:
+        '200':
+          description: Success get Category by ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: number
+                    example: 200
+                  status:
+                    type: string
+                    example: OK
+                  data:
+                    $ref: '#/components/schemas/CategoryResponseById'
+    put: 
+      description: Update Category by ID
+      summary: Update Category by ID
+      security:
+        - CategoryAuth: []
+      tags:
+        - "Category API"
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: ID of Category
+          schema:
+            type: number
+            example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateCategory'
+      responses:
+        '200':
+          description: Success update Category by ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: number
+                    example: 200
+                  status:
+                    type: string
+                    example: OK
+                  data:
+                    $ref: '#/components/schemas/Category'
+    delete:
+      description: Delete Category by ID
+      summary: Delete Category by ID
+      security:
+        - CategoryAuth: []
+      tags:
+        - "Category API"
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: ID of Category
+          schema:
+            type: number
+            example: 1
+      responses:
+        '200':
+          description: Success delete Category by ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: number
+                    example: 200
+                  status:
+                    type: string
+                    example: OK
+components:
+  securitySchemes:
+    CategoryAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Authentication for Category API
+  schemas:
+    CreateOrUpdateCategory:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Category 1"
+    Category:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Category 1"
+        createdAt:
+          type: string
+          example: "2021-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          example: "2021-01-01T00:00:00.000Z"
+    CategoryResponseById:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Category 1"
+        createdAt:
+          type: string
+          example: "2021-01-01T00:00:00.000Z"
+    CategoryResponseAll:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "Category 1"
+    
+
