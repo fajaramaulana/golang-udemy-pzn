@@ -5,6 +5,7 @@ import (
 	"belajarrestfullapi/controller"
 	"belajarrestfullapi/exception"
 	"belajarrestfullapi/helper"
+	"belajarrestfullapi/middleware"
 	"belajarrestfullapi/repository"
 	"belajarrestfullapi/service"
 	"fmt"
@@ -50,7 +51,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    "127.0.0.1:8081",
-		Handler: router,
+		Handler: middleware.NewAuthMiddleware(router),
 	}
 
 	log.Println("Server running on port 8081")
