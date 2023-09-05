@@ -71,11 +71,15 @@ func (controller *CategoryControllerImpl) Create(writter http.ResponseWriter, r 
 		return
 	}
 
-	categoryResponse, err := controller.CategoryService.Create(r.Context(), categoryCreateRequest)
+	categoryResponse, err, errValidation := controller.CategoryService.Create(r.Context(), categoryCreateRequest)
 
 	if err != nil {
 		log.Print(err.Error())
-		helper.ReturnDataJson(writter, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), err.Error())
+		if errValidation != nil {
+			helper.ReturnDataJson(writter, http.StatusBadRequest, err.Error(), errValidation)
+		} else {
+			helper.ReturnDataJson(writter, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), err.Error())
+		}
 		return
 	}
 
@@ -102,10 +106,14 @@ func (controller *CategoryControllerImpl) Update(writter http.ResponseWriter, r 
 	}
 
 	categoryUpdateRequest.Id = int(id)
-	categoryResponse, err := controller.CategoryService.Update(r.Context(), categoryUpdateRequest)
+	categoryResponse, err, errValidation := controller.CategoryService.Update(r.Context(), categoryUpdateRequest)
 	if err != nil {
 		log.Print(err.Error())
-		helper.ReturnDataJson(writter, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), err.Error())
+		if errValidation != nil {
+			helper.ReturnDataJson(writter, http.StatusBadRequest, err.Error(), errValidation)
+		} else {
+			helper.ReturnDataJson(writter, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), err.Error())
+		}
 		return
 	}
 

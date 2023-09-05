@@ -3,6 +3,7 @@ package main
 import (
 	"belajarrestfullapi/config"
 	"belajarrestfullapi/controller"
+	"belajarrestfullapi/exception"
 	"belajarrestfullapi/helper"
 	"belajarrestfullapi/repository"
 	"belajarrestfullapi/service"
@@ -44,6 +45,8 @@ func main() {
 		helper.ReturnDataJson(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed), nil)
 		return
 	})
+
+	router.PanicHandler = exception.ErrorHandler
 
 	server := http.Server{
 		Addr:    "127.0.0.1:8081",

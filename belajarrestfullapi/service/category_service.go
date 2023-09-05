@@ -8,6 +8,8 @@ import (
 	"belajarrestfullapi/repository"
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -16,8 +18,8 @@ import (
 type CategoryService interface {
 	FindAll(ctx context.Context) ([]response.CategoryResponseAll, error)
 	FindById(ctx context.Context, categoryId int) (response.CategoryResponseById, error)
-	Create(ctx context.Context, request request.CategoryCreateRequest) (response.CategoryResponse, error)
-	Update(ctx context.Context, request request.CategoryUpdateRequest) (response.CategoryResponse, error)
+	Create(ctx context.Context, request request.CategoryCreateRequest) (response.CategoryResponse, error, []map[string]string)
+	Update(ctx context.Context, request request.CategoryUpdateRequest) (response.CategoryResponse, error, []map[string]string)
 	Delete(ctx context.Context, categoryId int) error
 }
 
@@ -85,17 +87,33 @@ func (service *CategoryServiceImpl) FindById(ctx context.Context, categoryId int
 	}, nil
 }
 
-func (service *CategoryServiceImpl) Create(ctx context.Context, request request.CategoryCreateRequest) (response.CategoryResponse, error) {
+func (service *CategoryServiceImpl) Create(ctx context.Context, request request.CategoryCreateRequest) (response.CategoryResponse, error, []map[string]string) {
 	categoryResponseEmpty := response.CategoryResponse{}
 	err := service.Validation.Struct(request)
 
 	if err != nil {
-		return categoryResponseEmpty, err
+		// return error validation
+		var errArray []map[string]string
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Iterate through the validation errors and print field names and error messages.
+			for _, e := range validationErrors {
+				fieldName := e.Field()
+				errorMessage := e.Tag()
+				fmt.Printf("Field: %s, Error: %s\n", fieldName, errorMessage)
+				errArray = append(errArray, map[string]string{
+					"field": fieldName,
+					"error": errorMessage,
+				})
+			}
+
+		}
+		errNew := errors.New("error validation")
+		return categoryResponseEmpty, errNew, errArray
 	}
 	tx, err := service.DB.Begin()
 
 	if err != nil {
-		return categoryResponseEmpty, err
+		return categoryResponseEmpty, err, nil
 	}
 
 	// defer digunakan untuk mengeksekusi kode di dalamnya ketika fungsi sudah selesai dijalankan
@@ -111,7 +129,7 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request request.
 	category, err = service.CategoryRepository.Save(ctx, tx, category)
 
 	if err != nil {
-		return categoryResponseEmpty, err
+		return categoryResponseEmpty, err, nil
 	}
 
 	return response.CategoryResponse{
@@ -119,18 +137,33 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request request.
 		Name:      category.Name,
 		CreatedAt: category.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: category.UpdatedAt.Format(time.RFC3339),
-	}, nil
+	}, nil, nil
 }
 
-func (service *CategoryServiceImpl) Update(ctx context.Context, request request.CategoryUpdateRequest) (response.CategoryResponse, error) {
+func (service *CategoryServiceImpl) Update(ctx context.Context, request request.CategoryUpdateRequest) (response.CategoryResponse, error, []map[string]string) {
 	categoryResponseEmpty := response.CategoryResponse{}
 	err := service.Validation.Struct(request)
 	if err != nil {
-		return categoryResponseEmpty, err
+		var errArray []map[string]string
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			// Iterate through the validation errors and print field names and error messages.
+			for _, e := range validationErrors {
+				fmt.Printf("%# v\n", e)
+				fieldName := e.Field()
+				errorMessage := e.Tag()
+				errArray = append(errArray, map[string]string{
+					"field": fieldName,
+					"error": errorMessage,
+				})
+			}
+
+		}
+		errNew := errors.New("error validation")
+		return categoryResponseEmpty, errNew, errArray
 	}
 	tx, err := service.DB.Begin()
 	if err != nil {
-		return categoryResponseEmpty, err
+		return categoryResponseEmpty, err, nil
 	}
 
 	// defer digunakan untuk mengeksekusi kode di dalamnya ketika fungsi sudah selesai dijalankan
@@ -139,7 +172,7 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request request.
 
 	dataOld, err := service.CategoryRepository.FindById(ctx, tx, request.Id)
 	if err != nil {
-		return categoryResponseEmpty, err
+		return categoryResponseEmpty, err, nil
 	}
 
 	categoryUpdate := domain.Category{
@@ -151,7 +184,7 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request request.
 
 	categoryUpdate, err = service.CategoryRepository.Update(ctx, tx, categoryUpdate)
 	if err != nil {
-		return categoryResponseEmpty, err
+		return categoryResponseEmpty, err, nil
 	}
 
 	return response.CategoryResponse{
@@ -159,7 +192,7 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request request.
 		Name:      categoryUpdate.Name,
 		CreatedAt: categoryUpdate.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: categoryUpdate.UpdatedAt.Format(time.RFC3339),
-	}, nil
+	}, nil, nil
 
 }
 
