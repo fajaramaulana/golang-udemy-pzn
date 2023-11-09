@@ -9,7 +9,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -99,7 +98,6 @@ func (service *CategoryServiceImpl) Create(ctx context.Context, request request.
 			for _, e := range validationErrors {
 				fieldName := e.Field()
 				errorMessage := e.Tag()
-				fmt.Printf("Field: %s, Error: %s\n", fieldName, errorMessage)
 				errArray = append(errArray, map[string]string{
 					"field": fieldName,
 					"error": errorMessage,
@@ -148,7 +146,6 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request request.
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
 			// Iterate through the validation errors and print field names and error messages.
 			for _, e := range validationErrors {
-				fmt.Printf("%# v\n", e)
 				fieldName := e.Field()
 				errorMessage := e.Tag()
 				errArray = append(errArray, map[string]string{

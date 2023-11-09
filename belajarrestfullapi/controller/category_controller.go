@@ -83,7 +83,7 @@ func (controller *CategoryControllerImpl) Create(writter http.ResponseWriter, r 
 		return
 	}
 
-	helper.ReturnDataJson(writter, http.StatusOK, http.StatusText(http.StatusOK), categoryResponse)
+	helper.ReturnDataJson(writter, http.StatusCreated, http.StatusText(http.StatusCreated), categoryResponse)
 	return
 }
 

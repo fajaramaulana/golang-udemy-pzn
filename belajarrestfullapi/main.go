@@ -1,10 +1,9 @@
 package main
 
 import (
+	"belajarrestfullapi/app"
 	"belajarrestfullapi/config"
 	"belajarrestfullapi/controller"
-	"belajarrestfullapi/exception"
-	"belajarrestfullapi/helper"
 	"belajarrestfullapi/middleware"
 	"belajarrestfullapi/repository"
 	"belajarrestfullapi/service"
@@ -15,7 +14,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -29,25 +27,7 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepository, db, validation)
 	categoryController := controller.NewCategoryController(categoryService)
 
-	router := httprouter.New()
-
-	router.GET("/api/categories", categoryController.FindAll)
-	router.GET("/api/categories/:categoryId", categoryController.FindById)
-	router.POST("/api/categories", categoryController.Create)
-	router.PUT("/api/categories/:categoryId", categoryController.Update)
-	router.DELETE("/api/categories/:categoryId", categoryController.Delete)
-
-	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		helper.ReturnDataJson(w, http.StatusNotFound, http.StatusText(http.StatusNotFound), nil)
-		return
-	})
-
-	router.MethodNotAllowed = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		helper.ReturnDataJson(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed), nil)
-		return
-	})
-
-	router.PanicHandler = exception.ErrorHandler
+	router := app.NewRouter(categoryController)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:8081",
